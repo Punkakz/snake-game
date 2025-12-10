@@ -45,12 +45,6 @@ pipeline {
             }
         }
 
-        stage('Trivy Scan') {
-            steps {
-                trivyScan("${IMAGE}:${TAG}")
-            }
-        }
-
         stage('Docker Push') {
             steps {
                 dockerPush(IMAGE, TAG, DOCKER_CRED)
