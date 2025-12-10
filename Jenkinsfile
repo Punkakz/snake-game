@@ -53,9 +53,13 @@ pipeline {
 
         stage('Deploy to EC2') {
     steps {
-        sshagent(['ec2-ssh']) {   // <--- Your Jenkins SSH Credential ID
-            deployService(EC2_IP, "/home/ubuntu/deploy/snake-game")
-        }
+        sshagent(credentials: ['ec2-ssh']) {
+    sh """
+        ssh -o StrictHostKeyChecking=no ubuntu@${serverIp} \
+        "cd ${deployPath} && docker compose pull && docker compose up -d"
+    """
+}
+
     }
 }
 
