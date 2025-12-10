@@ -53,7 +53,7 @@ pipeline {
 
 	stage('Deploy to EC2') {
     steps {
-        deployService("/home/ubuntu/deploy/snake-game")
+        deployService("/home/ubuntu/git/snake-game/deploy")
     }
 }
 
