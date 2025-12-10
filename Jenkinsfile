@@ -51,18 +51,9 @@ pipeline {
             }
         }
 
-        stage('Deploy to EC2') {
+	stage('Deploy to EC2') {
     steps {
-        sshagent(credentials: ['ec2-ssh']) {
-            sh """
-                ssh -o StrictHostKeyChecking=no ubuntu@${EC2_IP} '
-                    cd /home/ubuntu/deploy/snake-game &&
-                    docker compose pull &&
-                    docker compose down &&
-                    docker compose up -d
-                '
-            """
-        }
+        deployService("/home/ubuntu/deploy/snake-game")
     }
 }
 
