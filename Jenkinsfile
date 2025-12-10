@@ -52,10 +52,13 @@ pipeline {
         }
 
         stage('Deploy to EC2') {
-            steps {
-                deployService(EC2_IP, "/home/ubuntu/deploy/snake-game")
-            }
+    steps {
+        sshagent(['ec2-ssh']) {   // <--- Your Jenkins SSH Credential ID
+            deployService(EC2_IP, "/home/ubuntu/deploy/snake-game")
         }
+    }
+}
+
     }
 
     post {
