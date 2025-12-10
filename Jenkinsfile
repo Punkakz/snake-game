@@ -51,7 +51,7 @@ pipeline {
             }
         }
 
-	stage('Deploy to EC2') {
+	stage('Deploy Application') {
     steps {
         deployService("/home/ubuntu/git/snake-game/deploy")
     }
