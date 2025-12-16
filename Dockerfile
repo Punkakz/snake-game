@@ -13,7 +13,7 @@ RUN mvn dependency:go-offline
 COPY src ./src
 
 # Build the JAR
-RUN mvn -B -DskipTests clean package
+RUN mvn clean package
 
 
 # ---------- STAGE 2: Runtime ----------
