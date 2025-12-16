@@ -1,112 +1,99 @@
 const canvas = document.getElementById("game");
 const ctx = canvas.getContext("2d");
 
-const SIZE = 420;
-const GRID = 21;
-const CELL = SIZE / GRID;
+const box = 20;                 // size of each cell
+const rows = canvas.height / box;
+const cols = canvas.width / box;
 
-let snake, food, dir, score;
+let snake;
+let food;
+let direction;
+let score;
+let gameInterval;
 
 function init() {
-    snake = [{ x: 10, y: 10 }];
+    snake = [{ x: 10 * box, y: 10 * box }];
     food = spawnFood();
-    dir = null;
+    direction = null;
     score = 0;
     updateScore();
+
+    if (gameInterval) clearInterval(gameInterval);
+    gameInterval = setInterval(draw, 120);
 }
 init();
 
 /* FOOD */
 function spawnFood() {
     return {
-        x: Math.floor(Math.random() * GRID),
-        y: Math.floor(Math.random() * GRID)
+        x: Math.floor(Math.random() * cols) * box,
+        y: Math.floor(Math.random() * rows) * box
     };
 }
 
-/* 3D PROJECTION */
-function project(x, y) {
-    const depth = 1 - y * 0.02;
-    return {
-        x: x * CELL + (CELL * (1 - depth)) / 2,
-        y: y * CELL * depth,
-        size: CELL * depth
-    };
-}
-
-/* DRAW */
-function drawBoard() {
-    ctx.fillStyle = "#000";
-    ctx.fillRect(0, 0, SIZE, SIZE);
-}
-
-function drawFood() {
-    const p = project(food.x, food.y);
-
-    ctx.fillStyle = "#ff3344";
-    ctx.shadowBlur = 20;
-    ctx.shadowColor = "#ff3344";
-
-    ctx.beginPath();
-    ctx.arc(p.x + p.size / 2, p.y + p.size / 2, p.size / 3, 0, Math.PI * 2);
-    ctx.fill();
-
-    ctx.shadowBlur = 0;
-}
-
-function drawSnake() {
-    snake.forEach((s, i) => {
-        const p = project(s.x, s.y);
-
-        const grad = ctx.createLinearGradient(
-            p.x, p.y,
-            p.x, p.y + p.size
-        );
-        grad.addColorStop(0, "#66ffcc");
-        grad.addColorStop(1, "#0f5132");
-
-        ctx.fillStyle = grad;
-        ctx.shadowBlur = 10;
-        ctx.shadowColor = "#22ffaa";
-
+/* DRAW GRID */
+function drawGrid() {
+    ctx.strokeStyle = "#ddd";
+    for (let i = 0; i <= cols; i++) {
         ctx.beginPath();
-        ctx.roundRect(p.x, p.y, p.size, p.size, p.size / 2);
-        ctx.fill();
-
-        // eyes
-        if (i === 0) {
-            ctx.shadowBlur = 0;
-            ctx.fillStyle = "#000";
-            ctx.beginPath();
-            ctx.arc(p.x + p.size * 0.65, p.y + p.size * 0.35, 2, 0, Math.PI * 2);
-            ctx.arc(p.x + p.size * 0.65, p.y + p.size * 0.65, 2, 0, Math.PI * 2);
-            ctx.fill();
-        }
-    });
+        ctx.moveTo(i * box, 0);
+        ctx.lineTo(i * box, canvas.height);
+        ctx.stroke();
+    }
+    for (let i = 0; i <= rows; i++) {
+        ctx.beginPath();
+        ctx.moveTo(0, i * box);
+        ctx.lineTo(canvas.width, i * box);
+        ctx.stroke();
+    }
 }
 
-/* GAME LOGIC */
-function update() {
-    if (!dir) return;
+/* MAIN DRAW */
+function draw() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
 
+    drawGrid();
+
+    // Draw food
+    ctx.fillStyle = "red";
+    ctx.fillRect(food.x, food.y, box, box);
+
+    // Draw snake
+    ctx.fillStyle = "green";
+    snake.forEach(part => {
+        ctx.fillRect(part.x, part.y, box, box);
+    });
+
+    if (!direction) return;
+
+    // Move snake
     let head = { ...snake[0] };
 
-    if (dir === "L") head.x--;
-    if (dir === "R") head.x++;
-    if (dir === "U") head.y--;
-    if (dir === "D") head.y++;
+    if (direction === "LEFT") head.x -= box;
+    if (direction === "UP") head.y -= box;
+    if (direction === "RIGHT") head.x += box;
+    if (direction === "DOWN") head.y += box;
 
-    head.x = (head.x + GRID) % GRID;
-    head.y = (head.y + GRID) % GRID;
+    // Wall collision (game over)
+    if (
+        head.x < 0 ||
+        head.y < 0 ||
+        head.x >= canvas.width ||
+        head.y >= canvas.height
+    ) {
+        gameOver();
+        return;
+    }
 
-    if (snake.some(s => s.x === head.x && s.y === head.y)) {
-        alert("Game Over! Score: " + score);
-        init();
+    // Self collision
+    if (snake.some(p => p.x === head.x && p.y === head.y)) {
+        gameOver();
         return;
     }
 
     snake.unshift(head);
 
+    // Eat food
     if (head.x === food.x && head.y === food.y) {
         score += 10;
         updateScore();
@@ -116,25 +103,23 @@ function update() {
     }
 }
 
+/* SCORE */
 function updateScore() {
     document.getElementById("score").innerText = `Score: ${score}`;
 }
 
-/* LOOP */
-function loop() {
-    drawBoard();
-    drawFood();
-    drawSnake();
-    update();
-    requestAnimationFrame(loop);
+/* GAME OVER */
+function gameOver() {
+    clearInterval(gameInterval);
+    alert("Game Over! Score: " + score);
+    init();
 }
-loop();
 
 /* CONTROLS */
 document.addEventListener("keydown", e => {
-    if (e.key === "ArrowLeft" && dir !== "R") dir = "L";
-    if (e.key === "ArrowRight" && dir !== "L") dir = "R";
-    if (e.key === "ArrowUp" && dir !== "D") dir = "U";
-    if (e.key === "ArrowDown" && dir !== "U") dir = "D";
+    if (e.key === "ArrowLeft" && direction !== "RIGHT") direction = "LEFT";
+    if (e.key === "ArrowUp" && direction !== "DOWN") direction = "UP";
+    if (e.key === "ArrowRight" && direction !== "LEFT") direction = "RIGHT";
+    if (e.key === "ArrowDown" && direction !== "UP") direction = "DOWN";
 });
 
