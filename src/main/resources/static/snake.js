@@ -5,13 +5,14 @@ const SIZE = 420;
 const GRID = 21;
 const CELL = SIZE / GRID;
 
-let snake, food, dir;
+let snake, food, dir, score;
 
-/* INIT */
 function init() {
     snake = [{ x: 10, y: 10 }];
     food = spawnFood();
     dir = null;
+    score = 0;
+    updateScore();
 }
 init();
 
@@ -19,12 +20,11 @@ init();
 function spawnFood() {
     return {
         x: Math.floor(Math.random() * GRID),
-        y: Math.floor(Math.random() * GRID),
-        pulse: 0
+        y: Math.floor(Math.random() * GRID)
     };
 }
 
-/* FAKE 3D PROJECTION */
+/* 3D PROJECTION */
 function project(x, y) {
     const depth = 1 - y * 0.02;
     return {
@@ -34,34 +34,26 @@ function project(x, y) {
     };
 }
 
-/* DRAW BOARD */
+/* DRAW */
 function drawBoard() {
-    ctx.fillStyle = "#020617";
+    ctx.fillStyle = "#000";
     ctx.fillRect(0, 0, SIZE, SIZE);
 }
 
-/* DRAW FOOD */
 function drawFood() {
-    food.pulse += 0.1;
     const p = project(food.x, food.y);
 
-    ctx.shadowBlur = 25;
-    ctx.shadowColor = "#ff3344";
     ctx.fillStyle = "#ff3344";
+    ctx.shadowBlur = 20;
+    ctx.shadowColor = "#ff3344";
 
     ctx.beginPath();
-    ctx.arc(
-        p.x + p.size / 2,
-        p.y + p.size / 2,
-        p.size / 3 + Math.sin(food.pulse) * 2,
-        0,
-        Math.PI * 2
-    );
+    ctx.arc(p.x + p.size / 2, p.y + p.size / 2, p.size / 3, 0, Math.PI * 2);
     ctx.fill();
+
     ctx.shadowBlur = 0;
 }
 
-/* DRAW SNAKE (3D STYLE) */
 function drawSnake() {
     snake.forEach((s, i) => {
         const p = project(s.x, s.y);
@@ -74,20 +66,14 @@ function drawSnake() {
         grad.addColorStop(1, "#0f5132");
 
         ctx.fillStyle = grad;
-        ctx.shadowBlur = i === 0 ? 20 : 8;
+        ctx.shadowBlur = 10;
         ctx.shadowColor = "#22ffaa";
 
         ctx.beginPath();
-        ctx.roundRect(
-            p.x,
-            p.y,
-            p.size,
-            p.size,
-            p.size / 2
-        );
+        ctx.roundRect(p.x, p.y, p.size, p.size, p.size / 2);
         ctx.fill();
 
-        // Eyes on head
+        // eyes
         if (i === 0) {
             ctx.shadowBlur = 0;
             ctx.fillStyle = "#000";
@@ -99,7 +85,7 @@ function drawSnake() {
     });
 }
 
-/* MOVE */
+/* GAME LOGIC */
 function update() {
     if (!dir) return;
 
@@ -114,7 +100,7 @@ function update() {
     head.y = (head.y + GRID) % GRID;
 
     if (snake.some(s => s.x === head.x && s.y === head.y)) {
-        alert("Game Over");
+        alert("Game Over! Score: " + score);
         init();
         return;
     }
@@ -122,10 +108,16 @@ function update() {
     snake.unshift(head);
 
     if (head.x === food.x && head.y === food.y) {
+        score += 10;
+        updateScore();
         food = spawnFood();
     } else {
         snake.pop();
     }
+}
+
+function updateScore() {
+    document.getElementById("score").innerText = `Score: ${score}`;
 }
 
 /* LOOP */
