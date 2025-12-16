@@ -1,67 +1,17 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<title>Snake Game Pro</title>
+def call(String image, String tag, String credId) {
 
-<style>
-body {
-    margin: 0;
-    background: #020617;
-    color: white;
-    font-family: Arial, sans-serif;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
+    withCredentials([usernamePassword(
+        credentialsId: credId,
+        usernameVariable: 'USER',
+        passwordVariable: 'PASS'
+    )]) {
+
+        sh """
+            echo "$PASS" | docker login -u "$USER" --password-stdin
+            docker push ${image}:${tag}
+            docker push ${image}:latest
+            docker logout
+        """
+    }
 }
-
-.container {
-    text-align: center;
-}
-
-canvas {
-    border-radius: 12px;
-    margin-top: 10px;
-}
-
-.controls {
-    margin-top: 12px;
-}
-
-button, select {
-    padding: 8px 14px;
-    margin: 4px;
-    border-radius: 8px;
-    border: none;
-    font-weight: bold;
-    cursor: pointer;
-}
-</style>
-</head>
-
-<body>
-<div class="container">
-    <h2>🐍 Snake Game Pro</h2>
-
-    <canvas id="game" width="400" height="400"></canvas>
-
-    <div class="controls">
-        <button onclick="startGame()">▶ Start</button>
-        <button onclick="stopGame()">⏸ Pause</button>
-        <button onclick="toggleAI()">🤖 AI</button>
-
-        <select onchange="setTheme(this.value)">
-            <option value="neon">🌈 Neon</option>
-            <option value="retro">🕹 Retro</option>
-            <option value="cyber">⚡ Cyber</option>
-        </select>
-    </div>
-
-    <p>Swipe on mobile · Arrow keys on desktop</p>
-</div>
-
-<script src="snake.js"></script>
-</body>
-</html>
 
