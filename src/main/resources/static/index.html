@@ -1,35 +1,67 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Snake Game</title>
-    <style>
-        body { text-align: center; font-family: Arial; }
-        canvas { background: #111; margin-top: 20px; }
-        button { padding: 10px 20px; margin: 5px; font-size: 18px; }
-        .controls button { width: 80px; height: 80px; font-size: 30px; }
-    </style>
+<meta charset="UTF-8">
+<title>Snake Game Pro</title>
+
+<style>
+body {
+    margin: 0;
+    background: #020617;
+    color: white;
+    font-family: Arial, sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+
+.container {
+    text-align: center;
+}
+
+canvas {
+    border-radius: 12px;
+    margin-top: 10px;
+}
+
+.controls {
+    margin-top: 12px;
+}
+
+button, select {
+    padding: 8px 14px;
+    margin: 4px;
+    border-radius: 8px;
+    border: none;
+    font-weight: bold;
+    cursor: pointer;
+}
+</style>
 </head>
+
 <body>
+<div class="container">
+    <h2>🐍 Snake Game Pro</h2>
 
-<h1>Snake Game 🐍</h1>
+    <canvas id="game" width="400" height="400"></canvas>
 
-<button onclick="startGame()">Start</button>
-<button onclick="stopGame()">Stop</button>
+    <div class="controls">
+        <button onclick="startGame()">▶ Start</button>
+        <button onclick="stopGame()">⏸ Pause</button>
+        <button onclick="toggleAI()">🤖 AI</button>
 
-<canvas id="game" width="400" height="400"></canvas>
+        <select onchange="setTheme(this.value)">
+            <option value="neon">🌈 Neon</option>
+            <option value="retro">🕹 Retro</option>
+            <option value="cyber">⚡ Cyber</option>
+        </select>
+    </div>
 
-<br><br>
-
-<!-- Mobile Controls -->
-<div class="controls">
-    <button onclick="setDirection('UP')">⬆</button><br>
-    <button onclick="setDirection('LEFT')">⬅</button>
-    <button onclick="setDirection('DOWN')">⬇</button>
-    <button onclick="setDirection('RIGHT')">➡</button>
+    <p>Swipe on mobile · Arrow keys on desktop</p>
 </div>
 
-<script src="snake.js"></script>
-
+<script src="game.js"></script>
 </body>
 </html>
 

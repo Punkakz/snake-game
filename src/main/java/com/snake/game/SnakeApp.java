@@ -9,3 +9,4 @@ public class SnakeApp {
         SpringApplication.run(SnakeApp.class, args);
     }
 }
+
